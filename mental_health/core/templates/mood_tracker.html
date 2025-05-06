@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Mood Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">How Are You Feeling Today?</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <h5 class="mb-3">Mood Level:</h5>
+                        <div class="d-flex justify-content-between">
+                            {% for choice in form.mood_score %}
+                            <div class="form-check form-check-inline">
+                                {{ choice.tag }}
+                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                    <span style="font-size: 2rem;">
+                                        {% if choice.choice_value == '1' %}😢
+                                        {% elif choice.choice_value == '2' %}🙁
+                                        {% elif choice.choice_value == '3' %}😐
+                                        {% elif choice.choice_value == '4' %}🙂
+                                        {% else %}😁
+                                        {% endif %}
+                                    </span>
+                                    <div class="text-center">{{ choice.choice_label }}</div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.mood_score.errors %}
+                        <div class="text-danger">
+                            {{ form.mood_score.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="mb-3">Journal Entry (Optional):</h5>
+                        {{ form.journal_entry }}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save"></i> Save Entry
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,30 +1,26 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-class CustomUser(AbstractUser):
-    is_therapist = models.BooleanField(default=False)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
+from django.contrib.auth.models import User
 
 class MoodEntry(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    mood_score = models.IntegerField()
-    journal_entry = models.TextField(blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    mood_score = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    journal_entry = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - Mood Score: {self.mood_score}"
+        return f"{self.user.username}'s mood entry on {self.created_at}"
 
-class TherapistProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+class Therapist(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=100)
-    license_number = models.CharField(max_length=50, unique=True)
-    availability = models.JSONField(blank=True, null=True)
+    license_number = models.CharField(max_length=50)
+    availability = models.JSONField()  # Store availability as JSON
 
     def __str__(self):
         return f"Therapist: {self.user.username}"
 
 class ForumPost(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     is_anonymous = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

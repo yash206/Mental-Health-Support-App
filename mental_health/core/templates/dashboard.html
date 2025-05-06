@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Dashboard{% endBlock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>Your Mood Journey</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="moodChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4>Quick Actions</h4>
+            </div>
+            <div class="card-body text-center">
+                <a href="{% url 'mood_tracker' %}" class="btn btn-primary btn-lg mb-3">
+                    <i class="bi bi-emoji-smile"></i> Log Mood
+                </a>
+                <a href="{% url 'ai_chat' %}" class="btn btn-secondary btn-lg mb-3">
+                    <i class="bi bi-robot"></i> AI Companion
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4>Recent Entries</h4>
+            </div>
+            <div class="card-body">
+                {% for entry in mood_data|slice:":5" %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 mood-{{ entry.mood_score }}">
+                    <span>{{ entry.created_at|date:"M d" }}</span>
+                    <span>
+                        {% if entry.mood_score == 1 %}😢
+                        {% elif entry.mood_score == 2 %}🙁
+                        {% elif entry.mood_score == 3 %}😐
+                        {% elif entry.mood_score == 4 %}🙂
+                        {% else %}😁
+                        {% endif %}
+                    </span>
+                </div>
+                {% empty %}
+                <p>No entries yet. <a href="{% url 'mood_tracker' %}">Add your first mood!</a></p>
+                {% endFor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('moodChart').getContext('2d');
+    const chartData = JSON.parse('{{ mood_chart_data|escapejs }}');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.dates,
+            datasets: [{
+                label: 'Mood Score',
+                data: chartData.scores,
+                borderColor: '#3e95cd',
+                backgroundColor: '#7bb6dd',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        callback: function(value) {
+                            const emojis = ['', '😢', '🙁', '😐', '🙂', '😁'];
+                            return emojis[value] + ' ' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endBlock %}
+{% endBlock %}
